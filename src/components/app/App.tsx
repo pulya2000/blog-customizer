@@ -1,12 +1,10 @@
-import React, { useState, CSSProperties, FormEvent } from "react";
+import { useState, CSSProperties, FormEvent } from "react";
 import { ArticleParamsForm } from "../article-params-form";
 import { defaultArticleState,  ArticleStateType, OptionType } from "../../constants/articleProps";
 import { Article } from "../article";
 
 import '../../styles/index.scss';
 import styles from '../../styles/index.module.scss';
-
-import clsx from 'clsx';
 
 export const App = () => {
 

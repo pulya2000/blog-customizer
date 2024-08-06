@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, FormEvent, useCallback } from 'react';
+import { useState, useRef, FormEvent } from 'react';
+import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 
 import { ArrowButton } from 'components/arrow-button';
 import { Button } from 'components/button';
@@ -7,8 +8,6 @@ import { Select } from 'components/select';
 import { Separator } from 'components/separator';
 import { Text } from 'components/text';
 
-import { useClose } from './hooks/useClose';
-import clsx from 'clsx';
 import {
 	OptionType,
 	fontFamilyOptions,
@@ -18,6 +17,7 @@ import {
 	backgroundColors,
 	contentWidthArr } from 'src/constants/articleProps';
 
+import clsx from 'clsx';
 import styles from './ArticleParamsForm.module.scss';
 
 type ArticleParamsFormProps ={
@@ -42,36 +42,24 @@ export const ArticleParamsForm = ({
 	sideBarState
 }: ArticleParamsFormProps) => {
 
-	const formRef = useRef<HTMLDivElement>(null);
-	const [isOpen, setIsOpen] = useState(false);
+	const formRef = useRef<HTMLFormElement>(null);
+	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	const toggleForm = () => {
     	setIsOpen((prev) => !prev);
     };
 
-	const handleClickOutside = (event: MouseEvent) => {
-		if (formRef.current && !formRef.current.contains(event.target as Node)) {
-			setIsOpen(false);
-		}
-	};
-
-	useEffect(() => {
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		} else {
-			document.removeEventListener('mousedown', handleClickOutside);
-		}
-		// Очистка обработчика при размонтировании компонента
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isOpen]);
+	useOutsideClickClose({
+		isOpen,
+		onClose: () => setIsOpen(false),
+		rootRef: formRef,
+	});
 
 	return (
 		<>
 			<ArrowButton onClick={toggleForm} isOpen={isOpen} />
-				<aside ref={formRef} className={`${styles.container} ${isOpen ? styles.container_open : ''}`}>
-					<form className={styles.form} onSubmit={applyButton} >
+				<aside className={clsx(styles.container, {[styles.container_open] : isOpen})}>
+					<form ref={formRef} className={styles.form} onSubmit={applyButton} >
 						<Text
 							size = {31}
 							weight = {800}
@@ -113,7 +101,7 @@ export const ArticleParamsForm = ({
 							title='ширина контента'
 						/>
 						<div className={styles.bottomContainer}>
-							<Button title='Сбросить' type='button' onClick={resetButton} />
+							<Button title='Сбросить' type='reset' onClick={resetButton} />
 							<Button title='Применить' type='submit' />
 						</div>
 					</form>
