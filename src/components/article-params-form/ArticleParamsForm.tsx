@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, useCallback, FormEvent } from 'react';
 import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 
 import { ArrowButton } from 'components/arrow-button';
@@ -15,35 +15,17 @@ import {
 	fontSizeOptions,
 	fontColors,
 	backgroundColors,
-	contentWidthArr } from 'src/constants/articleProps';
+	contentWidthArr,
+	defaultArticleState} from 'src/constants/articleProps';
 
 import clsx from 'clsx';
 import styles from './ArticleParamsForm.module.scss';
 
-type ArticleParamsFormProps ={
-	fontFamily: (select: OptionType) => void,
-	fontSize: (select: OptionType) => void,
-	fontColor: (select: OptionType) => void,
-	backgroundColor: (select: OptionType) => void,
-	contentWidth: (select: OptionType) => void,
-	resetButton: () => void,
-	applyButton: (event: FormEvent) => void,
-	sideBarState: ArticleStateType,
-};
-
-export const ArticleParamsForm = ({
-	fontFamily,
-	fontSize,
-	fontColor,
-	backgroundColor,
-	contentWidth,
-	resetButton,
-	applyButton,
-	sideBarState
-}: ArticleParamsFormProps) => {
+export const ArticleParamsForm = ({ onApply }: { onApply: (state: ArticleStateType) => void }) => {
 
 	const formRef = useRef<HTMLFormElement>(null);
 	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [sideBarState, setSideBarState] = useState<ArticleStateType>(defaultArticleState);
 
 	const toggleForm = () => {
     	setIsOpen((prev) => !prev);
@@ -55,11 +37,29 @@ export const ArticleParamsForm = ({
 		rootRef: formRef,
 	});
 
+	// Обработчик изменения состояния
+	const handleOnChange = (field: keyof ArticleStateType) => {
+		return (value: OptionType) => {
+			setSideBarState((prev) => ({ ...prev, [field]: value }));
+		};
+	};
+
+	// Обработчик сброса параметров
+	const handleResetButton = useCallback(() => {
+		setSideBarState(defaultArticleState);
+	}, []);
+
+	// Обработчик применения параметров
+	const handleApplyButton = useCallback((event: FormEvent) => {
+		event.preventDefault();
+		onApply(sideBarState);
+	}, [sideBarState, onApply]);
+
 	return (
 		<>
 			<ArrowButton onClick={toggleForm} isOpen={isOpen} />
 				<aside className={clsx(styles.container, {[styles.container_open] : isOpen})}>
-					<form ref={formRef} className={styles.form} onSubmit={applyButton} >
+					<form ref={formRef} className={styles.form} onSubmit={handleApplyButton} >
 						<Text
 							size = {31}
 							weight = {800}
@@ -71,37 +71,37 @@ export const ArticleParamsForm = ({
 						<Select
 							selected={sideBarState.fontFamilyOption}
 							options={fontFamilyOptions}
-							onChange={fontFamily}
+							onChange={handleOnChange('fontFamilyOption')}
 							title='шрифт'
 						/>
 						<RadioGroup
 							name='fontsize'
 							options={fontSizeOptions}
 							selected={sideBarState.fontSizeOption}
-							onChange={fontSize}
+							onChange={handleOnChange('fontSizeOption')}
 							title='размер шрифта'
 						/>
 						<Select
 							selected={sideBarState.fontColor}
 							options={fontColors}
-							onChange={fontColor}
+							onChange={handleOnChange('fontColor')}
 							title='цвет шрифта'
 						/>
 						<Separator />
 						<Select
 							selected={sideBarState.backgroundColor}
 							options={backgroundColors}
-							onChange={backgroundColor}
+							onChange={handleOnChange('backgroundColor')}
 							title='цвет фона'
 						/>
 						<Select
 							selected={sideBarState.contentWidth}
 							options={contentWidthArr}
-							onChange={contentWidth}
+							onChange={handleOnChange('contentWidth')}
 							title='ширина контента'
 						/>
 						<div className={styles.bottomContainer}>
-							<Button title='Сбросить' type='reset' onClick={resetButton} />
+							<Button title='Сбросить' type='reset' onClick={handleResetButton} />
 							<Button title='Применить' type='submit' />
 						</div>
 					</form>
