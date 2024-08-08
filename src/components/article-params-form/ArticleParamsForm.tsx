@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, FormEvent } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 
 import { ArrowButton } from 'components/arrow-button';
@@ -45,15 +45,16 @@ export const ArticleParamsForm = ({ onApply }: { onApply: (state: ArticleStateTy
 	};
 
 	// Обработчик сброса параметров
-	const handleResetButton = useCallback(() => {
+	const handleResetButton = () => {
 		setSideBarState(defaultArticleState);
-	}, []);
+		onApply(defaultArticleState);
+	};
 
 	// Обработчик применения параметров
-	const handleApplyButton = useCallback((event: FormEvent) => {
+	const handleApplyButton = (event: FormEvent) => {
 		event.preventDefault();
 		onApply(sideBarState);
-	}, [sideBarState, onApply]);
+	};
 
 	return (
 		<>

@@ -1,6 +1,6 @@
 import { useState, CSSProperties } from "react";
 import { ArticleParamsForm } from "../article-params-form";
-import { defaultArticleState, ArticleStateType } from "../../constants/articleProps";
+import { defaultArticleState } from "../../constants/articleProps";
 import { Article } from "../article";
 
 import '../../styles/index.scss';
@@ -10,10 +10,6 @@ export const App = () => {
 
 	// Состояние для отображения статьи
 	const [articleState, setArticleState] = useState(defaultArticleState);
-
-	const handleApplyButton = (newState: ArticleStateType) => {
-		setArticleState(newState);
-	};
 
 	return (
 		<main
@@ -27,7 +23,7 @@ export const App = () => {
 			} as CSSProperties}
 		>
 			<ArticleParamsForm
-				onApply={handleApplyButton}
+				onApply={setArticleState}
 			/>
 			<Article />
 		</main>
